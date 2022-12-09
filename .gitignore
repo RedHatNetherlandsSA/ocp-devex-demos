@@ -37,5 +37,9 @@ nb-configuration.xml
 
 #local dev project
 webapp
+03-RUN/service-mesh/demo/eshop-demo
+03-RUN/service-mesh/demo/catalog/target
+03-RUN/service-mesh/demo/inventory/target
+
 
 .dccache

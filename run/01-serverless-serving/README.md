@@ -218,3 +218,29 @@ Your service returns Hello World!
 ```shell
 oc delete project kn-dotnet
 ```
+
+
+Testing the autoscaling
+
+Let's define a concurrency soft limit for our service. This allows us to tell knative how many concurrent requests our service can handle before triggering the autoscaler. With a concurrency soft limit, it is still possible to burst over this limit in case of sudden spikes.
+
+kn service update --scale-target=10 hello
+
+We can also specify a concurrency target utilization threshold in order to pre-empt scaling needs, for example, if we reach a threshold of 70% of our scaling target, knative can spin up a new container/pod to anticipate the need to scale. This allows our service to be ready for the coming spike in traffic.
+
+kn service update --scale-utilization=70 hello
+
+first let's prime our servicer:
+
+curl -sqk https://hello-kn-dotnet.apps.sno-local.phybernet.org/
+
+
+Now let's inject some load to our service
+
+
+hey -z 60s -c 100  https://hello-kn-dotnet.apps.sno-local.phybernet.org/ 
+
+
+
+
+

@@ -36,6 +36,7 @@ nb-configuration.xml
 *.rej
 
 #local dev project
+tmp
 webapp
 03-RUN/service-mesh/demo/eshop-demo
 03-RUN/service-mesh/demo/catalog/target

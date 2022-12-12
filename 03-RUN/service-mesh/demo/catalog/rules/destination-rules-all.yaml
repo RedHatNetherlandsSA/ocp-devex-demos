@@ -1,0 +1,22 @@
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: catalog-service-dr
+  namespace: catalog
+spec:
+  host: catalog-springboot
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: catalog-database-dr
+  namespace: catalog
+spec:
+  host: catalog-database
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN

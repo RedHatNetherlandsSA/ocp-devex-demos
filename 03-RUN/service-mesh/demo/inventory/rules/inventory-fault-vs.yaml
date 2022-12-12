@@ -1,18 +1,17 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: inventory-fault-delay
+  name: inventory-fault
+  namespace: coolstore-inventory
 spec:
   hosts:
-    - "${GATEWAY_URL}"
-  gateways:
-    - catalog/catalog-gateway
+    - inventory
   http:
     - fault:
-        delay:
-          fixedDelay: 5s
+        abort:
+          httpStatus: 500
           percentage:
-            value: 100
+            value: 10
       route:
         - destination:
             host: inventory

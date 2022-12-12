@@ -803,6 +803,8 @@ So, what are the major benefits of using Service Mesh?:
 
 ### Let's recapture what Red Hat OpenShift Service Mesh provides
 
+![OpenShift Service Mesh](../../graphics/service-mesh-15.jpeg)
+
 #### Support for your security needs:
 
 Red Hat OpenShift Service Mesh provides out-of-the-box security for your distributed applications.

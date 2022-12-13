@@ -1,6 +1,6 @@
 bases:
-  - ../../base
+- ../../base
 patchesStrategicMerge:
-  - patch-deployment.yaml
+- patch-deployment.yaml
 namePrefix: prod-
 namespace: gitops-demo-prod

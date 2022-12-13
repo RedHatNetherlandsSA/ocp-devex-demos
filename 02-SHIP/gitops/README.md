@@ -276,8 +276,8 @@ oc new-project gitops-demo-production
 And we'll have to label our namespaces so that the Argo CD instance in the openshift-gitops namespace can manage it.
 
 ```shell
-oc label namespace dotnet-demo-staging argocd.argoproj.io/managed-by=openshift-gitops &&\
-oc label namespace dotnet-demo-production argocd.argoproj.io/managed-by=openshift-gitops
+oc label namespace gitops-demo-staging argocd.argoproj.io/managed-by=openshift-gitops &&\
+oc label namespace gitops-demo-production argocd.argoproj.io/managed-by=openshift-gitops
 ```
 
 ### Deploy apps with Argo

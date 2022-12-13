@@ -292,7 +292,23 @@ We'll create our Argo apps by applying our YAMLs in our terminal using oc cli.
 ```shell
 oc apply -k ./02-SHIP/gitops/argo
 ```
+The output should be similar to this:
+```shell
+application.argoproj.io/dotnet-demo-production created
+application.argoproj.io/dotnet-demo-staging created
+```
+And we should also see our applications in the Argo GUI
 
+Get ARGO URL from the route in openshift-gitops project:
+```shell
+ARGO="http://$(oc get -n openshift-gitops route openshift-gitops-server -o jsonpath="{.spec.host}")"
+```
+Open ARGO in your browser:
+```shell
+open -a "Google Chrome" $ARGO
+```
+
+![OpenShift GitOps](../../graphics/gitops-05.jpeg)
 
 
 #### Key features

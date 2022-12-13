@@ -22,9 +22,9 @@ spec:
         deployment: dotnet-demo
     spec:
       containers:
-        - image: image-registry.openshift-image-registry.svc:5000/gitops-demo/dotnet-demo@sha256:789608d0b13ac6b77655b4e8cf312e00982c6436dc437658a81a4e017fc61987
+        - name: dotnet-demo
+          image: image-registry.openshift-image-registry.svc:5000/gitops-demo/dotnet-demo@sha256:789608d0b13ac6b77655b4e8cf312e00982c6436dc437658a81a4e017fc61987
           imagePullPolicy: IfNotPresent
-          name: dotnet-demo
           ports:
             - containerPort: 8080
               protocol: TCP

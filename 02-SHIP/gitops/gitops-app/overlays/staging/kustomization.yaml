@@ -3,4 +3,4 @@ bases:
 patchesStrategicMerge:
 - patch-deployment.yaml
 namePrefix: stage-
-namespace: gitops-demo-stage
+namespace: gitops-demo-staging

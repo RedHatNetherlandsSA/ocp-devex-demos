@@ -3,4 +3,4 @@ bases:
 patchesStrategicMerge:
 - patch-deployment.yaml
 namePrefix: prod-
-namespace: gitops-demo-prod
+namespace: gitops-demo-production

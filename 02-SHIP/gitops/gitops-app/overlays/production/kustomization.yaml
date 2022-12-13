@@ -10,7 +10,7 @@ namespace: gitops-demo-production
 patchesJson6902:
 - target:
     version: v1
-    group: apps.openshift.io
+    group: apps
     kind: Deployment
     name: dotnet-demo
   path: patch-deployment.yaml

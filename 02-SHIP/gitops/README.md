@@ -279,13 +279,18 @@ And we'll have to label our namespaces so that the Argo CD instance in the opens
 oc label namespace gitops-demo-staging argocd.argoproj.io/managed-by=openshift-gitops &&\
 oc label namespace gitops-demo-production argocd.argoproj.io/managed-by=openshift-gitops
 ```
+The output should be similar to this:
+```shell
+namespace/gitops-demo-staging labeled
+namespace/gitops-demo-production labeled
+```
 
 ### Deploy apps with Argo
 
 We'll create our Argo apps by applying our YAMLs in our terminal using oc cli.
 
 ```shell
-oc apply -k ./gitops/argo/
+oc apply -k ./02-SHIP/gitops/argo
 ```
 
 

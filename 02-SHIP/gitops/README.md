@@ -312,6 +312,39 @@ open -a "Google Chrome" $ARGO
 
 ![OpenShift GitOps](../../graphics/gitops-06.jpeg)
 
+### Verifying Argo CD self-healing behavior
+
+Argo CD constantly monitors the state of deployed applications, detects differences between the specified manifests in Git and live changes in the cluster, and then automatically corrects them. This behavior is referred to as self-healing.
+
+We can test this by manually modifying or deleting our application resources.
+
+- Let's try scaling our pods up or down:
+
+```shell
+oc scale deployment stage-dotnet-demo --replicas 2  -n gitops-demo-staging
+```
+The result should be similar to this:
+```shell
+deployment.apps/stage-dotnet-demo scaled
+```
+But if we check running pods we should see only one pod running
+```shell
+oc get pods -n gitops-demo-staging
+```
+The output should be similar to this
+```shell
+NAME                                 READY   STATUS    RESTARTS   AGE
+stage-dotnet-demo-5bd84874bc-8qdjh   1/1     Running   0          10m
+```
+In the OpenShift web console, we could notice that the deployment scales up to two pods and immediately scales down again to one pod. 
+Argo CD detected a difference from the Git repository and auto-healed the application on the OpenShift Container Platform cluster.
+
+The similart behevior will
+
+```shell
+ROUTE="http://$(oc get route stage-dotnet-demo -n gitops-demo-staging -o jsonpath="{.spec.host}")" &&\
+curl -s $ROUTE | grep Welcome
+```
 
 #### Key features
 

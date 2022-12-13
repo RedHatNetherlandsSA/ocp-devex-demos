@@ -6,7 +6,7 @@ For more information, please see the [official product documentation](https://do
 - **[Introduction to OpenShift GitOps](#introduction-to-openshift-gitops)**<br>
 - **[Installing OpenShift GitOps](#installing-the-openshift-gitops-argo-cd-operator)**<br>
 - **[Deploy a demo application](#deploy-a-demo-application)**<br>
-- **[Adopting GitOps](#adopting-gitops)**<br>
+- **[Adopting GitOps practices](#adopting-gitops-practices)**<br>
 - **[Releasing applications with ArgoCD](#releasing-applications-with-argocd)**<br>
 - **[Key takeaways](#key-features)**<br>
 
@@ -22,9 +22,9 @@ GitOps allows for maintaining full transparency through Git audit capabilities a
 # Introduction to OpenShift GitOps
 
 OpenShift GitOps is built around open-source project Argo CD as the declarative GitOps engine that enables GitOps workflows across multicluster OpenShift and Kubernetes infrastructure. 
-Using Argo CD, teams can sync the state of OpenShift and Kubernetes clusters and applications with the content of the  Git repositories manually or automatically. 
-Argo CD continuously compares the state of the clusters and the Git repositories to identify any drift and can automatically bring the cluster back to the desired state if any change is detected on the Git repository or the cluster. 
-The auto-healing capabilities in Argo CD increase the security of the CD workflow by preventing undesired, unauthorized, or unvetted changes that might be performed directly on the cluster unintentionally or through security breaches.
+- Using Argo CD, teams can sync the state of OpenShift and Kubernetes clusters and applications with the content of the  Git repositories manually or automatically. 
+- Argo CD continuously compares the state of the clusters and the Git repositories to identify any drift and can automatically bring the cluster back to the desired state if any change is detected on the Git repository or the cluster. 
+- The auto-healing capabilities in Argo CD increase the security of the CD workflow by preventing undesired, unauthorized, or unvetted changes that might be performed directly on the cluster unintentionally or through security breaches.
 
 ![OpenShift GitOps](../../graphics/gitops-01.jpeg)
 
@@ -95,10 +95,6 @@ oc login -u myuser -p mypassword
 ```shell
 oc new-project gitops-demo
 ```
-- Verify that the project is empty
-```shell
-oc get all -n gitops-demo
-```
 
 ## Deploy a .NET Core application from GitHub
 
@@ -152,24 +148,24 @@ open -a "Google Chrome" $ROUTE
 ```
 ---
 
-# Adopting GitOps
+# Adopting GitOps practices
 
 ## Export YAMLs from our deployed demo app
 
 In the previous steps, for our application deployment, we have used the `oc new-app` command that has "magically" created all Kubernetes resources such as Deployment, Service, etc.
 
 Now, our first step in adopting GitOps practice will be to:
-**export all application configurations (YAML files) from our OpenShift cluster**,
-clear these files from unwanted metadata
-and store them in git.
+- export all application configurations (YAML files) from our OpenShift cluster,
+- clear these files from unwanted metadata and 
+- store them in application gitops repository.
 
 We can export all resources using `oc get all` command, like this:
 ```shell
-oc get all -l app=dotnet-demo -o yaml > ./dotnet-demo.yaml
+oc get all -l app=dotnet-demo -o yaml > ./tmp/dotnet-demo.yaml
 ```
 Once exported, we can manually remove unwanted metadata from the YAML file.
 
-To speed things up, we have created shall scripts that will automate exporting and cleaning of Deployment, Service and Route resources.
+To speed things up, we have created shell scripts that will automate exporting and cleaning of Deployment, Service and Route resources.
 After the successful execution of the scripts, all files will be available in the ./tmp folder, and we can copy them to our application gitops git repository.
 
 ```shell
@@ -180,13 +176,13 @@ After the successful execution of the scripts, all files will be available in th
 
 ## Bootstrap a GitOps repository.
 
-Now that we have our YAML files, we'll have to create and organize our GitOps repository, which will serve as a single source of truth for all further deployments to Kubernetes environments.
+Now that we have our YAML files, we'll have to create and organize our GitOps repository structure, which will serve as a single source of truth for all further deployments to Kubernetes environments.
 
 The question of best practices comes up a lot when creating repositories for GitOps. Unfortunately, there is no magic bullet, but several common patterns exist to match the various ways the organization interacts internally. You can read more about it in this [blog](https://developers.redhat.com/articles/2022/09/07/how-set-your-gitops-directory-structure#).
 
 For our demo app, we'll create a straightforward gitops repository following the [Kustomize](https://kustomize.io/) model. Kustomize is Argo's built-in templating engine, and we'll use it to customize our application configuration before releasing it to other Kubernetes environments.
 
-According to Kustomize we'll separate our application configuration sets into two types base and overlays.
+According to Kustomize we'll separate our application configuration sets into two types, base and overlays.
 - **Base** holds all common configuration resources.
 - **Overlays** keep differences from a specific environment.
 
@@ -205,7 +201,7 @@ Each directory contains a kustomization file, which is essentially a list of res
 - #### base/kustomization.yaml
 
 In our base directory, we'll create a kustomization.yaml file declaring all application resources.
-```
+```shell
 resources:
 - deployment.yaml
 - service.yaml
@@ -218,14 +214,13 @@ The other resources in this directory are exports from our demo application.
 To manage different configuration variations, we'll use overlays that modify our base configuration. 
 
 Before applying our application resources to stage and prod environments, we'll change things like Kubernetes namespace and container image in our overlays kustomization.yaml file.
-
-```yaml
+```shell
 bases:
 - ../../base
 patchesStrategicMerge:
   - patch-deployment.yaml
 namePrefix: stage-
-namespace: dotnet-demo-stage
+namespace: gitops-demo-stage
 ```
 
 With this, we should have everything in place to define our staging and production deployment using ArgoCD.
@@ -244,7 +239,7 @@ Our Argo app for staging environment looks like this:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: dotnet-demo-staging
+  name: gitops-demo-staging
   namespace: openshift-gitops
 spec:
   destination:
@@ -274,8 +269,8 @@ spec:
 Before we deploy our application, we''ll create new project namespaces, one for staging and another for production deployment.
 
 ```shell
-oc new-project dotnet-demo-staging &&\
-oc new-project dotnet-demo-production
+oc new-project gitops-demo-staging &&\
+oc new-project gitops-demo-production
 ```
 
 And we'll have to label our namespaces so that the Argo CD instance in the openshift-gitops namespace can manage it.

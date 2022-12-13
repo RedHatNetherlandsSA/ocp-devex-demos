@@ -1,6 +1,6 @@
 bases:
-- ../../base
+  - ../../base
 patchesStrategicMerge:
   - patch-deployment.yaml
 namePrefix: stage-
-namespace: dotnet-demo-stage
+namespace: gitops-demo-stage

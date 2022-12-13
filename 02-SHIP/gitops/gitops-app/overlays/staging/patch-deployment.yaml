@@ -1,11 +1,11 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: dotnet-demo
-spec:
-  replicas: 1
-  template:
-    spec:
-      containers:
-        - name: dotnet-demo
-          image: quay.io/adrina/dotnet-demo:main
+- op: replace
+  path: /spec/replicas
+  value: 2
+
+- op: replace
+  path: /spec/template/spec/containers/0/name
+  value: dotnet-demo-prod
+
+- op: replace
+  path: /spec/template/spec/containers/0/image
+  value: quay.io/adrina/dotnet-demo:latest

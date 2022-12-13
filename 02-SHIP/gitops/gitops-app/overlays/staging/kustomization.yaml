@@ -1,6 +1,13 @@
 bases:
 - ../../base
-patchesStrategicMerge:
-- patch-deployment.yaml
+
 namePrefix: stage-
 namespace: gitops-demo-staging
+
+patchesJson6902:
+  - target:
+      version: v1
+      group: apps.openshift.io
+      kind: Deployment
+      name: dotnet-demo
+    path: patch-deployment.yaml

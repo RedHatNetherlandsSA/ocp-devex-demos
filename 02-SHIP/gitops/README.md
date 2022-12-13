@@ -8,7 +8,7 @@ For more information, please see the [official product documentation](https://do
 - **[Deploy a demo application](#deploy-a-demo-application)**<br>
 - **[Adopting GitOps practices](#adopting-gitops-practices)**<br>
 - **[Releasing applications with ArgoCD](#releasing-applications-with-argocd)**<br>
-- **[Key takeaways](#key-features)**<br>
+- **[Key takeaways](#key-takeaways)**<br>
 
 ---
 # What is GitOps?
@@ -339,14 +339,26 @@ stage-dotnet-demo-5bd84874bc-8qdjh   1/1     Running   0          10m
 In the OpenShift web console, we could notice that the deployment scales up to two pods and immediately scales down again to one pod. 
 Argo CD detected a difference from the Git repository and auto-healed the application on the OpenShift Container Platform cluster.
 
-The similart behevior will
+Let's see what will happen when we delete an application resource.
 
+- We can verify that a route exits and our application is accessible:
 ```shell
-ROUTE="http://$(oc get route stage-dotnet-demo -n gitops-demo-staging -o jsonpath="{.spec.host}")" &&\
+ROUTE="http://$(oc get route dotnet-demo -n gitops-demo-staging -o jsonpath="{.spec.host}")" &&\
 curl -s $ROUTE | grep Welcome
 ```
 
-#### Key features
+Now let's delete this route and see if our application is still accessible.
+```shell
+oc delete route dotnet-demo -n gitops-demo-staging
+```
+```shell
+curl -s $ROUTE | grep Welcome
+```
+And our app is still there!
+
+---
+
+# Key takeaways
 
 Red Hat OpenShift GitOps helps you automate the following tasks:
 
@@ -354,3 +366,19 @@ Red Hat OpenShift GitOps helps you automate the following tasks:
 - Apply or revert configuration changes to multiple OpenShift Container Platform clusters
 - Associate templated configuration with different environments
 - Promote applications across clusters, from staging to production
+
+![OpenShift GitOps](../../graphics/gitops-07.jpeg)
+
+---
+
+# Let's clean things up
+
+```shell
+oc delete -k ./02-SHIP/gitops/argo
+oc delete all -l app=dotnet-demo -n gitops-demo && \
+oc delete all -l app=dotnet-demo -n gitops-demo-staging && \
+oc delete all -l app=dotnet-demo -n gitops-demo-production && \
+oc delete project gitops-demo && \
+oc delete project gitops-demo-staging && \
+oc delete project gitops-demo-production
+```

@@ -374,7 +374,7 @@ Red Hat OpenShift GitOps helps you automate the following tasks:
 # Let's clean things up
 
 ```shell
-oc delete -k ./02-SHIP/gitops/argo
+oc delete -k ./02-SHIP/gitops/argo && \
 oc delete all -l app=dotnet-demo -n gitops-demo && \
 oc delete all -l app=dotnet-demo -n gitops-demo-staging && \
 oc delete all -l app=dotnet-demo -n gitops-demo-production && \

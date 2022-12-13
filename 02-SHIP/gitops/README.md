@@ -151,14 +151,14 @@ open -a "Google Chrome" $ROUTE
 ```
 ---
 
-# Create a GitOps repository
+# Adopting GitOps
 
 ## Export YAMLs from our deployed demo app
 
-In the previous steps, for our application deployment, we have used the `oc new-app` command that has "magically" created for our demo application Kubernetes resources such as Deployment, Service, etc.
+In the previous steps, for our application deployment, we have used the `oc new-app` command that has "magically" created all Kubernetes resources such as Deployment, Service, etc.
 
 Now, our first step in adopting GitOps practice will be to:
-export all application configurations (YAML files) from our OpenShift cluster,
+**export all application configurations (YAML files) from our OpenShift cluster**,
 clear these files from unwanted metadata
 and store them in git.
 
@@ -177,7 +177,62 @@ After the successful execution of the scripts, all files will be available in th
 ./02-SHIP/gitops/export/03-route-export.sh gitops-demo dotnet-demo ./tmp/ 
 ```
 
-### Create a GitOps repository
+## Bootstrap a GitOps repository.
+
+Now that we have our YAML files, we'll have to create and organize our GitOps repository, which will serve as a single source of truth for all further deployments to Kubernetes environments.
+
+The question of best practices comes up a lot when creating repositories for GitOps. Unfortunately, there is no magic bullet, but several common patterns exist to match the various ways the organization interacts internally. You can read more about it in this [blog](https://developers.redhat.com/articles/2022/09/07/how-set-your-gitops-directory-structure#).
+
+For our demo app, we'll create a straightforward gitops repository following the [Kustomize](https://kustomize.io/) model. Kustomize is Argo's built-in templating engine, and we'll use it to customize our application configuration before releasing it to other Kubernetes environments.
+
+According to Kustomize we'll separate our application configuration sets into two types base and overlays.
+- **Base** holds all common configuration resources.
+- **Overlays** keep differences from a specific environment.
+
+```
+gitops-app
+├── base
+└── overlays
+  ├── production
+  └── staging
+```
+
+### Kustomization file
+
+Each directory contains a kustomization file, which is essentially a list of resources or manifests that describes how to generate or transform Kubernetes objects.
+
+- #### base/kustomization.yaml
+
+In our base directory, we'll create a kustomization.yaml file declaring all application resources.
+```
+resources:
+- deployment.yaml
+- service.yaml
+- route.yaml
+```
+The other resources in this directory are exports from our demo application.
+
+- #### overlays/staging/kustomization.yaml
+
+To manage different configuration variations, we'll use overlays that modify our base configuration. 
+
+Before applying our application resources to stage and prod environments, we'll change things like Kubernetes namespace and container image in our overlays kustomization.yaml file.
+
+```yaml
+bases:
+- ../../base
+patchesStrategicMerge:
+  - patch-deployment.yaml
+namePrefix: stage-
+namespace: dotnet-demo-stage
+```
+
+With this, we should have everything in place to define our staging and production deployment using ArgoCD.
+
+---
+
+
+
 
 
 oc label namespace dotnet-demo-dev argocd.argoproj.io/managed-by=openshift-gitops

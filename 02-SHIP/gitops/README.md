@@ -6,8 +6,9 @@ For more information, please see the [official product documentation](https://do
 - **[Introduction to OpenShift GitOps](#introduction-to-openshift-gitops)**<br>
 - **[Installing OpenShift GitOps](#installing-the-openshift-gitops-argo-cd-operator)**<br>
 - **[Deploy a demo application](#deploy-a-demo-application)**<br>
-- **[Create a GitOps repository](#deploy-a-demo-application)**<br>
-- **[Key takeaways](#)**<br>
+- **[Adopting GitOps](#adopting-gitops)**<br>
+- **[Releasing applications with ArgoCD](#releasing-applications-with-argocd)**<br>
+- **[Key takeaways](#key-features)**<br>
 
 ---
 # What is GitOps?
@@ -231,14 +232,66 @@ With this, we should have everything in place to define our staging and producti
 
 ---
 
+# Releasing applications with ArgoCD
 
+With Argo CD, we can deploy our applications to the OpenShift cluster either using the Argo CD dashboard or the CLI tool. 
+In our demo, we'll use pre-baked YAML files and CLI tools, but if you're interested to see how you can create an Argo app using GUI, please check this walk-through out [Getting Started with OpenShift GitOps](https://github.com/redhat-developer/openshift-gitops-getting-started)
 
+### Create an Argo app
 
+Our Argo app for staging environment looks like this:
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dotnet-demo-staging
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: dotnet-demo-staging
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: 02-SHIP/gitops/gitops-app/overlays/staging
+    repoURL: https://github.com/RedHatNetherlandsSA/ocp-devex-demos.git
+    targetRevision: main
+  ignoreDifferences:
+  - group: route.openshift.io
+    jsonPointers:
+      - /spec/host
+      - /status/ingress
+    kind: Route
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+```
 
-oc label namespace dotnet-demo-dev argocd.argoproj.io/managed-by=openshift-gitops
+### Add projects to Argo
 
+Before we deploy our application, we''ll create new project namespaces, one for staging and another for production deployment.
 
+```shell
+oc new-project dotnet-demo-staging &&\
+oc new-project dotnet-demo-production
+```
 
+And we'll have to label our namespaces so that the Argo CD instance in the openshift-gitops namespace can manage it.
+
+```shell
+oc label namespace dotnet-demo-staging argocd.argoproj.io/managed-by=openshift-gitops &&\
+oc label namespace dotnet-demo-production argocd.argoproj.io/managed-by=openshift-gitops
+```
+
+### Deploy apps with Argo
+
+We'll create our Argo apps by applying our YAMLs in our terminal using oc cli.
+
+```shell
+oc apply -k ./gitops/argo/
+```
 
 
 

@@ -310,6 +310,8 @@ open -a "Google Chrome" $ARGO
 
 ![OpenShift GitOps](../../graphics/gitops-05.jpeg)
 
+![OpenShift GitOps](../../graphics/gitops-06.jpeg)
+
 
 #### Key features
 

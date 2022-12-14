@@ -229,6 +229,8 @@ OpenShift Pipelines builds upon the Tekton project to enable teams to build Kube
 - **Build images with Kubernetes tools:** You can use the build tool of your choice for building images. Source-to-Image (S2I), Buildah and Dockerfiles, Jib, Kaniko and more.
 - **Developer tools:** Command-line tool to interact with the pipelines in addition to integrations with OpenShift developer console and IDE plugins.
 
+![OpenShift Pipelines](../../graphics/pipelines-03.jpeg)
+
 ---
 
 ### Let's clean things up

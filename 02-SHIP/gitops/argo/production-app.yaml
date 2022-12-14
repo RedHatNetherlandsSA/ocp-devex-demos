@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dotnet-demo-production
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: gitops-demo-production
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: 02-SHIP/gitops/gitops-app/overlays/production
+    repoURL: https://github.com/RedHatNetherlandsSA/ocp-devex-demos.git
+    targetRevision: main
+  ignoreDifferences:
+    - group: route.openshift.io
+      jsonPointers:
+        - /spec/host
+        - /status/ingress
+      kind: Route
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

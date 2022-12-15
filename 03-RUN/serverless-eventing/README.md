@@ -1,4 +1,14 @@
-# Knative Eventing Demo
+# Serverless Eventing Demo
+
+For more information, please see the [official product documentation](https://docs.openshift.com/container-platform/4.11/serverless/serverless-release-notes.html)
+
+## Table of Contents
+- **[Key Eventing Concepts](#key-eventing-concepts)**<br>
+- **[Pre-Requisites](#lets-setup-the-pre-requisites-for-the-demo)**<br>
+- **[Creating a demo scenario](#lets-build-a-demo-service)**<br>
+- **[Key takeaways](#key-takeaways)**<br>
+- **[Cleaning up](#clean-things-up)**<br>
+---
 
 OpenShift provides developers the capability to build serverless applications using the knative framework.
 
@@ -229,7 +239,10 @@ oc apply -f ./03-RUN/serverless-eventing/demo/event-triggers/event-trigger-US.ya
 
 //TODO
 
+# Key takeaways
 
+//TODO
 
+# Clean Things Up
 
-
+//TODO

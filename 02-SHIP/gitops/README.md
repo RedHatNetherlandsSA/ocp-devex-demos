@@ -5,7 +5,7 @@ For more information, please see the [official product documentation](https://do
 - **[What is GitOps?](#what-is-gitops)**<br>
 - **[Introduction to OpenShift GitOps](#introduction-to-openshift-gitops)**<br>
 - **[Installing OpenShift GitOps](#installing-the-openshift-gitops-argo-cd-operator)**<br>
-- **[Deploy a demo application](#deploy-a-demo-application)**<br>
+- **[Deploying a demo application](#deploying-a-demo-application)**<br>
 - **[Adopting GitOps practices](#adopting-gitops-practices)**<br>
 - **[Releasing applications with ArgoCD](#releasing-applications-with-argocd)**<br>
 - **[Key takeaways](#key-takeaways)**<br>
@@ -46,6 +46,7 @@ Note: If you dont want to use OpenShift Console GUI for installing Pipelines Ope
 ```shell
 oc apply -k https://github.com/redhat-cop/gitops-catalog/openshift-gitops-operator/overlays/latest
 ```
+The result should be similar to this:
 ```shell
 subscription.operators.coreos.com/openshift-gitops-operator created
 ```
@@ -66,12 +67,13 @@ openshift-gitops-redis-794f4dbb9f-8mnmt                       1/1     Running   
 openshift-gitops-repo-server-67bd56c86d-fdq4z                 1/1     Running   0          119s
 openshift-gitops-server-699f794bb5-8qp2p                      1/1     Running   0          119s
 ```
+With this, we have installed OpenShift GitOps, which as a result, creates a ready-to-use Argo CD instance that is available in the openshift-gitops namespace.
 
 ## Login to Argo CD instance
 
-Red Hat OpenShift GitOps Operator automatically creates a ready-to-use Argo CD instance that is available in the openshift-gitops namespace.
+Now, let's access our ready-to-use Argo CD instance using the `openshift-gitops-server` route in `openshift-gitops` namespace
 
-Get ARGO URL from the route in openshift-gitops project:
+Get ARGO Server URL from the route in openshift-gitops project:
 ```shell
 ARGO="http://$(oc get -n openshift-gitops route openshift-gitops-server -o jsonpath="{.spec.host}")"
 ```
@@ -79,11 +81,19 @@ Open ARGO in your browser:
 ```shell
 open -a "Google Chrome" $ARGO
 ```
+We can also navigate to the OpenShift Console applications menu icon menu → OpenShift GitOps → Cluster Argo CD.
+
+The login page of the Argo CD UI is displayed in a new window.
+
 ![OpenShift GitOps](../../graphics/gitops-04.jpeg)
+
+And we'll log in using our OpenShift credentials.
 
 ---
 
-# Deploy a demo application
+# Deploying a demo application
+
+Here we'll create our application namespaces and deploy the .Net demo application using `oc new-app` from the source code hosted on GitHub.
 
 ## Let's set things up
 
@@ -107,12 +117,12 @@ The ``new-app`` command typically also creates a Deployment object to deploy the
 
 In addition, we'll have to expose our service by creating a route to access our application externally via a web browser.
 
-### Let's create our app from the git repo
+- deploy the app
 ```shell
 oc new-app --name=dotnet-demo 'dotnet:6.0-ubi8~https://github.com/redhat-developer/s2i-dotnetcore-ex#dotnet-6.0' \
 --build-env DOTNET_STARTUP_PROJECT=app
 ```
-Kubernetes resources created:
+Kubernetes' resources created:
 ```shell
 ...
 --> Creating resources ...
@@ -132,7 +142,7 @@ oc status
 oc expose service dotnet-demo
 ```
 
-## Access the service using the Route URL
+- Access the service using the Route URL
 ```shell
 ROUTE="http://$(oc get route dotnet-demo -o jsonpath="{.spec.host}")" &&\
 curl -s $ROUTE | grep Welcome
@@ -149,6 +159,10 @@ open -a "Google Chrome" $ROUTE
 ---
 
 # Adopting GitOps practices
+
+We'll start adopting our GitOps practices by exporting and cleaning our Kubernetes application resources such as Deployments, Services, and Routes and placing them in our newly created gitops configuration repository.
+
+We'll also introduce Kustomize, a built-in templating engine, and we'll create templates for our application deployment to staging and production environments.
 
 ## Export YAMLs from our deployed demo app
 
@@ -217,11 +231,32 @@ Before applying our application resources to stage and prod environments, we'll 
 ```shell
 bases:
 - ../../base
-patchesStrategicMerge:
-  - patch-deployment.yaml
-namePrefix: stage-
-namespace: gitops-demo-stage
+
+namespace: gitops-demo-staging
+
+patchesJson6902:
+- target:
+    version: v1
+    group: apps
+    kind: Deployment
+    name: dotnet-demo
+  path: patch-deployment.yaml
 ```
+And our patch-deployment.yaml looks like this:
+```yaml
+- op: replace
+  path: /spec/replicas
+  value: 1
+
+- op: replace
+  path: /spec/template/spec/containers/0/name
+  value: dotnet-demo-prod
+
+- op: replace
+  path: /spec/template/spec/containers/0/image
+  value: quay.io/adrina/dotnet-demo:latest
+```
+It will patch the values for the number of replicas, name of the container and container image used for deployment.
 
 With this, we should have everything in place to define our staging and production deployment using ArgoCD.
 
@@ -231,6 +266,8 @@ With this, we should have everything in place to define our staging and producti
 
 With Argo CD, we can deploy our applications to the OpenShift cluster either using the Argo CD dashboard or the CLI tool. 
 In our demo, we'll use pre-baked YAML files and CLI tools, but if you're interested to see how you can create an Argo app using GUI, please check this walk-through out [Getting Started with OpenShift GitOps](https://github.com/redhat-developer/openshift-gitops-getting-started)
+
+In the end, we'll verify Argo CD self-healing behaviour by modifying and deleting Kubernetes resources managed by Argo.
 
 ### Create an Argo app
 
@@ -266,7 +303,7 @@ spec:
 
 ### Add projects to Argo
 
-Before we deploy our application, we''ll create new project namespaces, one for staging and another for production deployment.
+Before we deploy our application, we''ll create new project namespaces, for staging and production deployment.
 
 ```shell
 oc new-project gitops-demo-staging &&\
@@ -309,6 +346,8 @@ open -a "Google Chrome" $ARGO
 ```
 
 ![OpenShift GitOps](../../graphics/gitops-05.jpeg)
+
+By clicking on one of deployed Argo apps, we'll see a complete overview of all created components and their relationships.
 
 ![OpenShift GitOps](../../graphics/gitops-06.jpeg)
 

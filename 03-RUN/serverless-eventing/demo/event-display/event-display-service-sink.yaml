@@ -1,0 +1,25 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: event-display
+  namespace: kn-dotnet
+spec:
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      containerConcurrency: 0
+      containers:
+        - image: >-
+            quay.io/openshift-knative/knative-eventing-sources-event-display:latest
+          name: user-container
+          readinessProbe:
+            successThreshold: 1
+            tcpSocket:
+              port: 0
+          resources: {}
+      enableServiceLinks: false
+      timeoutSeconds: 300
+  traffic:
+    - latestRevision: true
+      percent: 100

@@ -1,0 +1,198 @@
+# Knative Eventing Demo
+
+OpenShift provides developers the capability to build serverless applications using the knative framework.
+
+![serverless01](../../graphics/serverless-01.png)
+
+![serverless-operational-benefits](../../graphics/serverless-operational-benefits.png)
+
+But first, let's explain some of the key concepts, before diving into a more concrete example.
+
+# Key Eventing Concepts
+
+## CloudEvents
+
+CloudEvents (cloudevents.io) provide a consistent message format that can be used in eventing systems. This specification has already been adopted by all major cloud providers and simplify the way we interact with eventing systems by providing a standardized message format to allow interoperability between different implementations.
+
+The message is structured in a way that it contains metadata for a event and a data element that contains the actual payload of the event.
+
+```json
+{
+    "specversion" : "1.0",
+    "type" : "com.example.someevent",
+    "source" : "/mycontext",
+    "subject": null,
+    "id" : "C234-1234-1234",
+    "time" : "2018-04-05T17:31:00Z",
+    "comexampleextension1" : "value",
+    "comexampleothervalue" : 5,
+    "datacontenttype" : "application/json",
+    "data" : {
+        "appinfoA" : "abc",
+        "appinfoB" : 123,
+        "appinfoC" : true
+    }
+}
+```
+
+As you can see this specification provides a flexible message structure that allows us to standardize on events that flow through our applications. This also simplifies maintenance on our applications as this format is easily extendable without major refactor of our code and infrastructure causing a ripple effect through our entire solution.
+
+## Event Source
+
+An event source acts links a provider of events to your knatvie eventing system. It defines the origin of generated events. There are multiple different event sources that are provided by standard, for example a event source that listens to a kafka topic. Additional event sources can also be made available to the platform by installing the Camel-K operator in OpenShift. 
+
+![serverless-event-sources](../../graphics/serverless-event-sources.png)
+
+## Event Sink
+
+An event sink defines a target for events. In other words events from an event source gets propagated to an event sink. Examples of an event sink could be brokers, services, channels or event cloud provider services like databases. Additional event sources can also be made available to the platform by installing the Camel-K operator in OpenShift.
+
+![serverless-event-sinks](../../graphics/serverless-event-sinks.png)
+
+## Channels and Brokers
+
+Channels and Brokers allow us to distribute events between multiple components in our event based solution in a scalable way. They help us to define where events are routed and distributed.
+
+Channels define essentially a single message type distribution between event subscribers, allowing us to fan out events to multiple subscribers. Channels are mostly used when we have simple event routing requirements or need to perform data transformation steps between services.
+
+Brokers create a more scalable event mesh that allows us to distribute multiple message types between multiple event sinks. Triggers can be defined to route different message types to different event sinks or we can also route events based on payload information.
+
+![serverless-distributing-events](../../graphics/serverless-distributing-events.png)
+
+## Putting it all together
+
+![serverless-eventing-choreography](../../graphics/serverless-eventing-choreography.png)
+
+# Let's setup the pre-requisites for the demo
+
+## Creating a kafka instance for our eventing backbone
+
+Knative ships with an in-memory channel based broker implementation that is fine to use for development purposes. However for production use, it is recommended to use a kafka based implementation. In this case we will setup kafka to serve as the backbone for our example.
+
+### Installing the AMQ Streams operator
+
+First we will install the AMQ Streams operator that will allow us to create kafka instances.
+
+
+```shell
+oc apply -f ./03-RUN/serverless-eventing/amq-streams-setup/amq-streams-operator-setup.yaml
+```
+
+### Creating a kafka instance
+
+Next, we will create a namespace for our kafka broker and then create a kafka instance.
+
+```shell
+oc apply -f ./03-RUN/serverless-eventing/amq-streams-setup/kafka-namespace.yaml
+oc apply -f ./03-RUN/serverless-eventing/amq-streams-setup/kafka-instance.yaml
+```
+
+Note: In our example we use persistent volume claims for the kafka storage, you can also opt for ephemeral storage for development purposes. If this is the case use the kafka-instance-ephemeral.yaml manifest to create your kafka instance.
+
+### Creating a KnativeEventing instance
+
+Next we create a KnativeEventing instance to configure all the required serverless components to support eventing. In this case we also configure the default channel and broker implementation to use kafka as the default type.
+
+```shell
+oc apply -f ./03-RUN/serverless-eventing/knative-eventing-setup/knative-eventing-instance.yaml
+```
+
+Switch to the knative-eventing namespace and verify that all pods have started properly before moving to the next step.
+
+### Creating a KnativeKafka instance
+
+Next we create a knative-kafka instance the configures knative eventing to use our previously setup kafka cluster. Note here that this CR contains the bootstrap addresses for our kafka cluster.
+
+```shell
+oc apply -f ./03-RUN/serverless-eventing/knative-eventing-setup/knative-kafka-instance.yaml
+```
+
+
+
+
+# Let's build a demo service
+
+For this demo we will have a fairly simple use case to explain the concepts. In this use case we have a request generator that generates random order fulfilment requests that can either be fulfilled by an EU or a US fulfilment center. When a new fulfilment request is produced on a kafka topic, we will route it via our event mesh broker to an appropriate serverless service to fulfil the request. In our example the target serverless services simply print the request to the log for us to check.
+
+![usecase](../../graphics/eventing-usecase-01.png)
+
+## Create a new project
+
+```shell
+$ oc new-project kn-dotnet
+
+Now using project "kn-dotnet" on server "https://api.sno-local.phybernet.org:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app rails-postgresql-example
+
+to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:
+
+    kubectl create deployment hello-node --image=k8s.gcr.io/e2e-test-images/agnhost:2.33 -- /agnhost serve-hostname
+```
+
+## Create a broker 
+
+In this example we will create a broker instance that will serve as the event mesh to distribute our received events to event sinks.
+
+First let's list the current brokers:
+
+```shell
+$ kn broker list
+No brokers found.
+```
+
+Now, let's create a broker:
+
+```shell
+$ kn broker create my-broker
+```
+
+This takes a while for the broker to be ready. Once it is ready we can see the URL for the broker and see all the conditions show an OK status.
+
+```shell
+$ kn broker list
+NAME        URL                                                                                  AGE   CONDITIONS   READY   REASON
+my-broker   http://kafka-broker-ingress.knative-eventing.svc.cluster.local/kn-dotnet/my-broker   47h   7 OK / 7     True    
+```
+
+If you describe the broker, you can see from the Annotations that the broker class is of type Kafka.
+
+```shell
+$ kn broker describe my-broker
+Name:         my-broker
+Namespace:    kn-dotnet
+Annotations:  eventing.knative.dev/broker.class=Kafka, eventing.knative.dev/creator=kube:admin, e ...
+Age:          1d
+
+Address:  
+  URL:    http://kafka-broker-ingress.knative-eventing.svc.cluster.local/kn-dotnet/my-broker
+
+Conditions:  
+  OK TYPE                  AGE REASON
+  ++ Ready                  1m 
+  ++ Addressable            1d 
+  ++ ConfigMapUpdated       1d Config map knative-eventing/kafka-broker-brokers-triggers updated
+  ++ ConfigParsed           1d 
+  ++ DataPlaneAvailable     1d 
+  ++ ProbeSucceeded         1m 
+  ++ TopicReady             1d Topic knative-broker-kn-dotnet-my-broker created
+
+```
+
+## Deploy our generator application
+
+## Create a kafka event source
+
+## Deploy our fulfilment center event sink services
+
+## Create triggers
+
+## Testing our application
+
+
+
+
+
+

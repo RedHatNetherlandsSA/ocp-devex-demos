@@ -1,0 +1,25 @@
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeEventing
+metadata:
+  name: knative-eventing
+  namespace: knative-eventing
+spec:
+  config:
+    config-br-default-channel:
+      channel-template-spec: |
+        apiVersion: messaging.knative.dev/v1beta1
+        kind: KafkaChannel 
+        spec:
+          numPartitions: 6 
+          replicationFactor: 3
+    config-br-defaults:
+      default-br-config: |
+        clusterDefault: 
+          brokerClass: Kafka
+          apiVersion: v1
+          kind: ConfigMap
+          name: kafka-broker-config 
+          namespace: knative-eventing
+  defaultBrokerClass: Kafka
+  registry: {}
+  

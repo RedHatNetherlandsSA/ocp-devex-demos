@@ -1,7 +1,7 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: event-display
+  name: event-display-us
   namespace: kn-dotnet
 spec:
   template:

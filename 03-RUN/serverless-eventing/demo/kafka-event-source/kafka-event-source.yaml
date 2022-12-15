@@ -1,0 +1,35 @@
+apiVersion: sources.knative.dev/v1beta1
+kind: KafkaSource
+metadata:
+  name: kafka-source
+  namespace: kn-dotnet
+  labels:
+    app: kafka-source
+    app.kubernetes.io/component: kafka-source
+    app.kubernetes.io/instance: kafka-source
+    app.kubernetes.io/name: kafka-source
+    app.kubernetes.io/part-of: event-sources-app
+spec:
+  bootstrapServers:
+    - 'my-cluster-kafka-bootstrap.knative-kafka.svc:9092'
+    - 'my-cluster-kafka-bootstrap.knative-kafka.svc:9093'
+  consumerGroup: fulfilment
+  consumers: 1
+  initialOffset: latest
+  net:
+    sasl:
+      password: {}
+      type: {}
+      user: {}
+    tls:
+      caCert: {}
+      cert: {}
+      key: {}
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: my-broker
+      namespace: kn-dotnet
+  topics:
+    - fulfilment

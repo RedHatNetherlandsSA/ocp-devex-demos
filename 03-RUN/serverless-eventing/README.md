@@ -183,14 +183,51 @@ Conditions:
 
 ## Deploy our generator application
 
+In our use case, we will deploy a generator application which will generate random fulfilment request events on a kafka topic. In this case we have a simple quarkus application that exposes a REST api that allows us to specify the number of requests we need to generate. This application will generate the events on the fulfilment topic on our kafka broker.
+
+In order to deploy the application, we will make use of the quarkus-openshift extension to deploy the application directly from our IDE.
+
+Navigate to the ./03-RUN/serverless-eventing/demo/generator folder in a terminal.
+
+Run the following command to deploy our application (make sure you have logged in with oc and you are working in the correct project)
+
+```shell
+mvn quarkus:build -Dquarkus.kubernetes.deploy=true -Dquarkus.openshift.env.vars.kafka-bootstrap-servers=my-cluster-kafka-bootstrap.knative-kafka.svc:9091,my-cluster-kafka-bootstrap.knative-kafka.svc:9092,my-cluster-kafka-bootstrap.knative-kafka.svc:9093  -Dquarkus.kubernetes-client.trust-certs=true -Dquarkus.openshift.route.expose=true
+```
+
+This will build your application and create all the required deploymentconfigs on your Openshift environment.
+
 ## Create a kafka event source
+
+Next we will create a kafka event source to listen to our "fulfilment" topic and distribute it to events sinks via the broker.
+
+```shell
+oc apply -f ./03-RUN/serverless-eventing/demo/kafka-event-source/kafka-event-source.yaml
+```
+
+This configuration sets up the connection to our kafka cluster, specifies the topic to listen to and routes the events to our event broker.
 
 ## Deploy our fulfilment center event sink services
 
+Next, we will deploy to event sinks for our EU and US fulfilment centers respectively. These event sinks will simply print the events they receive to the container logs. We will create 2 similar event sinks deployed as serverless serving deployments. This means that when there are no events to process, they will scale to zero. When events are received they will scale up to process all the incoming requests.
+
+```shell
+oc apply -f ./03-RUN/serverless-eventing/demo/event-display/event-display-service-sink-EU.yaml
+oc apply -f ./03-RUN/serverless-eventing/demo/event-display/event-display-service-sink-US.yaml
+```
+
 ## Create triggers
+
+Finally, we will create 2 broker triggers that will route events to the appropriate fulfilment center event sink. The trigger in this case specifies a header field to route on and a target event sink to route to.
+
+```shell
+oc apply -f ./03-RUN/serverless-eventing/demo/event-triggers/event-trigger-EU.yaml
+oc apply -f ./03-RUN/serverless-eventing/demo/event-triggers/event-trigger-US.yaml
+```
 
 ## Testing our application
 
+//TODO
 
 
 

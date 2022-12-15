@@ -1,0 +1,18 @@
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: fulfilment-trigger-us
+  namespace: kn-dotnet
+  labels:
+    eventing.knative.dev/broker: my-broker
+spec:
+  broker: my-broker
+  filter:
+    attributes:
+      kafkaheadercesubject: US
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: event-display-us
+      namespace: kn-dotnet

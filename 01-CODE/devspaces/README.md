@@ -37,20 +37,46 @@ The DevSpaces Operator can be installed through OpenShift Console or fully autom
 We can also run the env setup script in ./devspaces-setup folder
 
 ```shell
-./00-ocp-devspaces/devspaces-setup/devspaces.sh
+./01-CODE/devspaces/devspaces-setup/install.sh
+```
+```shell
+subscription.operators.coreos.com/devspaces created
+namespace/openshift-devspaces created
+checluster.org.eclipse.che/devspaces created
+```
+We can monitor the installation process by checking the pods in `openshift-devspaces` namespace:
+```shell
+oc get pods -n openshift-devspaces
+```
+The output should be similar to this:
+```shell
+NAME                                   READY   STATUS    RESTARTS   AGE
+che-gateway-654fd79899-r8whs           4/4     Running   0          3m44s
+devfile-registry-bbbb98b97-56hbq       1/1     Running   0          5m26s
+devspaces-6d9996c886-4h9g4             1/1     Running   0          3m44s
+devspaces-dashboard-5946b579bd-kvxrx   1/1     Running   0          4m13s
+plugin-registry-7fbf445766-5vchf       1/1     Running   0          5m2s
+postgres-79876b64f7-9q2z4              1/1     Running   0          6m12s
 ```
 
 After successful installation, we can access our DevSpaces using the devspaces route
 
-```
-oc get route devspaces -o template --template='{{.spec.host}}' -n openshift-devspaces
+```shell
+DS_URL="http://$(oc get route devspaces -o template --template='{{.spec.host}}' -n openshift-devspaces)" &&\
+open -a "Google Chrome" $DS_URL
 ```
 Now we'll log in to our Dev Spaces using OpenShift credentials and create a new workspace from our Git repo.
+```shell
+https://github.com/RedHatNetherlandsSA/ocp-devex-demos.git
+```
 
 ---
 
-Our Git repo contains a devfile. Devfiles are yaml text files used for development environment customization. We'll use them to configure our projects' specific needs and share the customized devfile across the team to ensure identical user experience and build, run, and deploy behaviours.
+Our Git repo contains a devfile. 
+Devfiles are yaml text files used for development environment customization. 
+We'll use them to configure our projects' specific needs and share the customized devfile across the team to ensure identical user experience and build, run, and deploy behaviours.
 
+- devfile.yaml
 ```yaml
 schemaVersion: 2.1.0
 metadata:
@@ -70,7 +96,8 @@ components:
       mountSources: true
       sourceMapping: /projects
 ```
-You do not need a devfile to start a workspace. If you do not include a devfile in your project repository, Red Hat OpenShift Dev Spaces automatically loads a default devfile with a Universal Developer Image (UDI).
+You do not need a devfile to start a workspace. 
+If you do not include a devfile in your project repository, Red Hat OpenShift Dev Spaces automatically loads a default devfile with a Universal Developer Image (UDI).
 
 [OpenShift Dev Spaces devfile registry](https://github.com/eclipse-che/che-devfile-registry) contains ready-to-use devfiles for different languages and technologies.
 
@@ -85,8 +112,8 @@ So, after providing your Git repo with or without a devfile to Che via API or Da
 To test our workspace, we'll create a simple dotnet Hello World application and run ```dotnet publish``` command to prepare our application for deployment.
 
 ```shell
-dotnet new web -o webapp
-cd webapp
+dotnet new web -o webapp &&\
+cd webapp &&\
 dotnet publish -c Release
 ```
 A new folder should appear in our application directory /bin/Release/net6.0/publish.
@@ -110,32 +137,21 @@ oc new-project my-dev-sandbox
 With the dev project created, we can start preparing our application build resources.
 - We'll first create a new binary build object for our dotnet 6 application.
 - Once defined, we can trigger our build by providing our application build artefacts.
+- After build completion, a newly created container image will be available for deployment.
+- We'll also expose our service to the world and add a health check
 
 ```shell
-oc new-build dotnet:6.0 --binary --name=mywebapp -l app=mywebapp
-oc start-build mywebapp --from-dir=./bin/Release/net6.0/publish --follow
-```
-
-After build completion, a newly created container image will be available for deployment. We can check our container images by describing image stream objects on OpenShift.
-
-```shell
-oc describe is mywebapp
-```
-
-With new container images in place, we can trigger the deployment of our application.
-```shell
-oc new-app mywebapp
-```
-
-We'll also run following commands to expose our service to the world and add a health check:
-```shell
-oc expose service/mywebapp \
-&& oc set probe deployment/mywebapp  --readiness --get-url=http://:8080 --initial-delay-seconds=5 --period-seconds=5 --failure-threshold=15
+oc new-build dotnet:6.0 --binary --name=mywebapp -l app=mywebapp &&\
+oc start-build mywebapp --from-dir=./bin/Release/net6.0/publish --follow &&\
+oc new-app mywebapp -l app=mywebapp &&\
+oc expose service/mywebapp &&\
+oc set probe deployment/mywebapp  --readiness --get-url=http://:8080 --initial-delay-seconds=5 --period-seconds=5 --failure-threshold=15
 ```
 
 Now everyone can access our app from the web using a route
 ```shell
-oc get route mywebapp
+APP_URL="http://$(oc get route mywebapp -o template --template='{{.spec.host}}')" &&\
+curl -s $APP_URL
 ```
 
 ---
@@ -159,7 +175,9 @@ oc start-build mywebapp --from-dir=./bin/Release/net6.0/publish
 ```
 
 After build completion, we should see our changes in the web browser.
-
+```shell
+curl -s $APP_URL
+```
 ---
 
 ## What Next?
@@ -172,18 +190,13 @@ You can quickly spin up a development environment with everything you need, all 
 ## Key takeaways
 
 Dev Spaces
-- Accelerate onboarding of projects and developers.
-- Removes inconsistencies and “it works on my machine...” delays.
-- Protects source code by removing it from hard-to-secure laptops.
-
-And the method used to enable this is pictured below.
-
-![OpenShift Dev Spaces](../../graphics/devspaces-02.png)
-
 - **Code:** Simplify on-boarding and coding with always-available, infinitely scalable developer workspaces.
 - **Collaborate more efficiently:** Cut configuration time and share workspaces easily. Integrate with the tools you already use.
 - **Secure:** Centrally host source code to improve security without sacrificing speed.
 
+And the method used to enable this is pictured below.
+
+![OpenShift Dev Spaces](../../graphics/devspaces-02.png)
 
 ---
 
@@ -192,10 +205,7 @@ And the method used to enable this is pictured below.
 We can delete all application artefacts by applying the label ``-l app=mywebapp`` and finally delete our project (kubernetes namespace).
 
 ```shell
-oc delete all -l app=mywebapp
+oc delete all -l app=mywebapp &&\
 oc delete project my-dev-sandbox
 ```
 ---
-
-links:
-https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/developing_.net_applications_in_rhel_8/using-net-core-on-ocp_gsg

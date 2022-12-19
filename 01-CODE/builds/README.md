@@ -229,5 +229,5 @@ oc delete all -l app=s2i-dotnetcore-ex -n s2i-demo
 oc delete project s2i-demo
 
 oc delete all -l app=mywebapp -n my-dev-sandbox
-oc delete my-dev-sandbox
+oc delete project my-dev-sandbox
 ```

@@ -188,6 +188,8 @@ After the successful execution of the scripts, all files will be available in th
 ./02-SHIP/gitops/export/03-route-export.sh gitops-demo dotnet-demo ./tmp/ 
 ```
 
+Note: There are also `kubectl` plugins available like [Krew](https://blog.ccavazos.co/posts/kubectl-krew-oc-neat) that focuses on making your YAMLs look like they used to before creating the resources in your cluster.
+
 ## Bootstrap a GitOps repository.
 
 Now that we have our YAML files, we'll have to create and organize our GitOps repository structure, which will serve as a single source of truth for all further deployments to Kubernetes environments.

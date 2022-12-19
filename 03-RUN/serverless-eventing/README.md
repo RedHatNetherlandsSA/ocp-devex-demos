@@ -237,12 +237,46 @@ oc apply -f ./03-RUN/serverless-eventing/demo/event-triggers/event-trigger-US.ya
 
 ## Testing our application
 
-//TODO
+In order to test our application, we will use curl to invoke our generator service, passing it the number of fulfilment events to generate. First, though, let's verify our services are scaled down in the Developer Topology:
+
+![serverless-scaled-down](../../graphics/serverless-scaled-down.png)
+
+Now, let's generate some events
+
+```shell
+curl -skq -X POST -H "Content-Type: application/json" -d '{"numberOfRequests":100}'  http://generator-kn-dotnet.apps.sno-local.phybernet.org/fulfilment-requests
+```
+
+This will generate 100 new fulfilment requests with a random fulfilment center code and publish this to our kafka topic.
+
+In the Developer Topology view, you can now see the fulfilment services scaling up to handle the requests:
+
+![serverless-scaled-up](../../graphics/serverless-scaled-up.png)
+
+If we have a look at the logs of the running pods, we can see that our events are routed to the correct fulfilment center service.
+
+First the US fulfilment center:
+
+![serverless-logs-us](../../graphics/serverless-logs-us.png)
+
+Then the EU fulfilment center:
+
+![serverless-logs-eu](../../graphics/serverless-logs-eu.png)
+
+
+Once our events have finished processing, our services start to scale down again. As you can see this happens dynamically based on the load/number of events received.
+
+![serverless-scaling-down](../../graphics/serverless-scaling-down.png)
 
 # Key takeaways
 
-//TODO
+* CloudEvents give us the interoperability which allows us to easily expand our applications listening and reacting to events. A common message format minimizes the impact to our applications or infrastructure if the data payload changes.
+* Eventing gives us flexibility to react in near realtime to events generated either in our applications or based on events from external systems
+* Serverless allows us to scale effectively on demand, creating reactive systems that work efficiently with our cluster resources.
+
 
 # Clean Things Up
 
-//TODO
+```shell
+oc delete project kn-dotnet
+```

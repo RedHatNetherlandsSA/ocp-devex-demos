@@ -221,6 +221,8 @@ Instead of building multiple layers in a single Dockerfile, S2I encourages autho
 - #### Security
 Dockerfiles are run without many of the normal operational controls of containers, usually running as root and having access to the container network. S2I can be used to control what permissions and privileges are available to the builder image since the build is launched in a single container. In concert with platforms like OpenShift, source-to-image can enable admins to tightly control what privileges developers have at build time.
 
+---
+
 ## Clean things up
 ```shell
 oc delete all -l app=s2i-dotnetcore-ex -n s2i-demo

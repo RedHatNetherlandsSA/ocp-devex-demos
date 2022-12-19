@@ -25,6 +25,14 @@ odo is a fast, and iterative CLI tool for developers who write, build, and deplo
 * Containers first: We provide first class support for both Kubernetes and OpenShift. Choose your favourite container orchestrator and develop your application.
 * Easy to learn: Simple syntax and design centered around concepts familiar to developers, such as projects, applications, and components.
 
+### Devfiles
+
+One of the key building blocks used by odo is a devfile. A devfile provides a consistent developer runtime environment for containers (similar in concept to a base image with developer tools included) that can be distributed to teams via a devfile registry. This allows teams to pre-bake a good development environment for the language or framework that is used and define a standard way of working. This devfile can also include build and CI commands or deployment options.
+
+![devfile-ecosystem](../../graphics/devfile-ecosystem.png)
+
+For more information about devfiles, go to https://devfile.io
+
 ---
 
 ## Let's set things up

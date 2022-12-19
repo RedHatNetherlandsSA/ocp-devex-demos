@@ -83,8 +83,8 @@ Then we'll log into our OpenShift cluster, create a project and create a new bui
 - #### Create a simple dotnet Hello World application
 
 ```shell
-dotnet new web -o webapp
-cd webapp
+dotnet new web -o webapp &&\
+cd webapp &&\
 dotnet publish -c Release
 ```
 After completion of ```dotnet publish``` command, a new folder should appear in our application directory /bin/Release/net6.0/publish.
@@ -126,7 +126,10 @@ oc get route mywebapp
 ```
 
 With this, we have deployed our application from the local binary source. 
-After every application code change, we can simply start a new-build by executing the ```oc start-build mywebapp``` command.
+
+After every application ***code change***, 
+we can simply compile our app using `dotnet publish -c Release` command 
+and start a new-build by executing the `oc start-build mywebapp --from-dir=./bin/Release/net6.0/publish` command.
 
 ---
 
@@ -139,11 +142,23 @@ For example, a new image tag was made available with important security fixes, a
 
 - #### Let's try it out:
 
-Our BuildConfig, by default, has preconfigured triggers on Config and ImageChange. We can check this by describing our BuildConfig.
+Our BuildConfig, by default, has preconfigured triggers on Config and ImageChange. 
+We can check this by describing our BuildConfig.
+For more information please see [official documentation](https://docs.openshift.com/container-platform/4.11/cicd/builds/triggering-builds-build-hooks.html)
 
+- Let's switch to our s2i-demo project
+```shell
+oc project s2i-demo
+```
+- Now let's describe our BuildConfig and look for Triggers
 ```shell
 oc describe bc dotnet-demo | grep Trigger
 Triggered by:     Config, ImageChange
+```
+- In case triggers are missing, we can add them like this:
+```shell
+oc set triggers bc <name> --from-github
+oc set triggers bc/dotnet-demo --from-image=openshift/dotnet:6.0-ubi8
 ```
 
 - We'll use the ImageChange trigger for our example.
@@ -165,7 +180,7 @@ url=https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/dotne
 
 From this, we see our ImageStream tag pointing to an image on access.redhat.com with tag 6.0-5.1645817052.
 
-- Let's see on access.redhat.com if there is a new tag available.
+- Let's see on [access.redhat.com](https://catalog.redhat.com/software/containers/search?q=dotnet) if there is a new tag available.
 
 And yes, the latest tag is 6.0-20.20221101100921.
 
@@ -192,16 +207,25 @@ With this integration we have a very elegant way of maintaining our base images 
 
 ## Key takeaways
 The main advantage of using S2I for building reproducible container images is the ease of use for developers.
-### Resources Created by the oc new-app Command
+### Goals
 
-The oc new-app command adds the following resources to the current project to support building and deploying an application:
-- A build configuration to build the application container image from either source code or a Dockerfile.
-- An image stream pointing to either the generated image in the internal registry or to an existing image in an external registry.
-- A deployment resource using the image stream as input to create application pods.
-- A service for all ports that the application container image exposes.
+- #### Reproducibility
+Allow build environments to be tightly versioned by encapsulating them within a container image and defining a simple interface (injected source code) for callers. Reproducible builds are a key requirement to enabling security updates and continuous integration in containerized infrastructure, and builder images help ensure repeatability as well as the ability to swap runtimes.
+
+- #### Flexibility
+Any existing build system that can run on Linux can be run inside of a container, and each individual builder can also be part of a larger pipeline. In addition, the scripts that process the application source code can be injected into the builder image, allowing authors to adapt existing images to enable source handling.
+
+- #### Speed
+Instead of building multiple layers in a single Dockerfile, S2I encourages authors to represent an application in a single image layer. This saves time during creation and deployment, and allows for better control over the output of the final image.
+
+- #### Security
+Dockerfiles are run without many of the normal operational controls of containers, usually running as root and having access to the container network. S2I can be used to control what permissions and privileges are available to the builder image since the build is launched in a single container. In concert with platforms like OpenShift, source-to-image can enable admins to tightly control what privileges developers have at build time.
 
 ## Clean things up
 ```shell
-oc delete all -l app=s2i-dotnetcore-ex
+oc delete all -l app=s2i-dotnetcore-ex -n s2i-demo
 oc delete project s2i-demo
+
+oc delete all -l app=mywebapp -n my-dev-sandbox
+oc delete my-dev-sandbox
 ```

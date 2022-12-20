@@ -73,12 +73,9 @@ With this, we have installed OpenShift GitOps, which as a result, creates a read
 
 Now, let's access our ready-to-use Argo CD instance using the `openshift-gitops-server` route in `openshift-gitops` namespace
 
-Get ARGO Server URL from the route in openshift-gitops project:
+Get ARGO Server URL from the route in openshift-gitops project and open it in your browser:
 ```shell
-ARGO="http://$(oc get -n openshift-gitops route openshift-gitops-server -o jsonpath="{.spec.host}")"
-```
-Open ARGO in your browser:
-```shell
+ARGO="http://$(oc get -n openshift-gitops route openshift-gitops-server -o jsonpath="{.spec.host}")" &&\
 open -a "Google Chrome" $ARGO
 ```
 We can also navigate to the OpenShift Console applications menu icon menu → OpenShift GitOps → Cluster Argo CD.
@@ -362,11 +359,11 @@ We can test this by manually modifying or deleting our application resources.
 - Let's try scaling our pods up or down:
 
 ```shell
-oc scale deployment stage-dotnet-demo --replicas 2  -n gitops-demo-staging
+oc scale deployment dotnet-demo --replicas 2  -n gitops-demo-staging
 ```
 The result should be similar to this:
 ```shell
-deployment.apps/stage-dotnet-demo scaled
+deployment.apps/dotnet-demo scaled
 ```
 But if we check running pods we should see only one pod running
 ```shell
@@ -374,8 +371,8 @@ oc get pods -n gitops-demo-staging
 ```
 The output should be similar to this
 ```shell
-NAME                                 READY   STATUS    RESTARTS   AGE
-stage-dotnet-demo-5bd84874bc-8qdjh   1/1     Running   0          10m
+NAME                           READY   STATUS    RESTARTS   AGE
+dotnet-demo-5bd84874bc-8qdjh   1/1     Running   0          10m
 ```
 In the OpenShift web console, we could notice that the deployment scales up to two pods and immediately scales down again to one pod. 
 Argo CD detected a difference from the Git repository and auto-healed the application on the OpenShift Container Platform cluster.

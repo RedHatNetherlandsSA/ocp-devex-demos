@@ -3,7 +3,7 @@ bases:
 
 commonLabels:
   app: catalog
-  app.kubernetes.io/version: "v1"
+  version: "v1"
   app.kubernetes.io/name: catalog
   app.kubernetes.io/part-of: coolstore-catalog
   app.kubernetes.io/component: spring-boot-service

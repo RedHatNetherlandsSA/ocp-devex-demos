@@ -10,8 +10,6 @@ spec:
       port: 5432
       protocol: TCP
       targetPort: 5432
-  selector:
-    app: inventory-database
   sessionAffinity: None
   type: ClusterIP
 status:

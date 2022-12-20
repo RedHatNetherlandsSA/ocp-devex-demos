@@ -665,10 +665,10 @@ Let’s now add a 5 second delay for the inventory service.
 
 First, delete the existing inventory-fault VirtualService:
 ```shell
-oc delete virtualservice/inventory-fault -n inventory
+oc delete virtualservice/inventory-fault -n coolstore-inventory
 ```
 
-Then create a new virtualservice
+Then create a new virtualservice inventory-fault-delay
 ```yaml
 oc apply -f - << EOF
 apiVersion: networking.istio.io/v1alpha3
@@ -703,7 +703,7 @@ Hover over the black average data point to confirm that the average response tim
 Before we move to the next step, clean up the fault injection:
 
 ```shell
-oc delete virtualservice/inventory-fault-delay -n inventory
+oc delete virtualservice/inventory-fault-delay -n coolstore-inventory
 ```
 
 ### Enable Circuit Breaker

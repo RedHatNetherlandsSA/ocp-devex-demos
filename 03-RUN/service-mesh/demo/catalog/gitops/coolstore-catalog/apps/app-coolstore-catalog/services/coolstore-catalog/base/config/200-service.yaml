@@ -4,22 +4,18 @@ metadata:
   name: catalog
 spec:
   ports:
-    - name: http-8080
-      port: 8080
-      protocol: TCP
-      targetPort: 8080
-    - name: tcp-8443
-      port: 8443
-      protocol: TCP
-      targetPort: 8443
-    - name: tcp-8778
-      port: 8778
-      protocol: TCP
-      targetPort: 8778
-#    - name: metrics
-#      port: 8080
-#      protocol: TCP
-#      targetPort: 8080
+  - name: http-8080
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: tcp-8443
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+  - name: tcp-8778
+    port: 8778
+    protocol: TCP
+    targetPort: 8778
   sessionAffinity: None
   type: ClusterIP
 status:

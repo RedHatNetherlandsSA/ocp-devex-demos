@@ -69,6 +69,9 @@ Now we'll log in to our Dev Spaces using OpenShift credentials and create a new 
 ```shell
 https://github.com/RedHatNetherlandsSA/ocp-devex-demos.git
 ```
+After clicking on Create & Open our Work Space will start with loading:
+
+![OpenShift Dev Spaces](../../graphics/devspaces-03.jpg)
 
 ---
 
@@ -86,7 +89,7 @@ attributes:
 projects:
   - git:
       remotes:
-        origin: 'https://github.com/adnan-drina/ocp-devex-demos.git'
+        origin: 'https://github.com/RedHatNetherlandsSA/ocp-devex-demos.git'
     name: ocp-devex-demos
 components:
   - name: dev-tools

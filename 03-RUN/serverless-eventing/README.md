@@ -107,6 +107,14 @@ In case you have not setup the serverless operator yet, you can do that by execu
 oc apply -f ./03-RUN/serverless-eventing/serverless-operator-setup/serverless-operator-setup.yaml
 ```
 
+### Setup the Serverless Serving Component
+
+In order to deploy the demo (and to use eventing), an instance of Knative Serving needs to be installed.
+
+```shell
+oc apply -f ./03-RUN/serverless-eventing/knative-serving-setup/knative-serving-instance.yaml
+```
+
 ### Creating a KnativeEventing instance
 
 Next we create a KnativeEventing instance to configure all the required serverless components to support eventing. In this case we also configure the default channel and broker implementation to use kafka as the default type.

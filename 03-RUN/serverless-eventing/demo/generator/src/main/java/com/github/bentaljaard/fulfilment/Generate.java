@@ -16,6 +16,7 @@ import org.eclipse.microprofile.reactive.messaging.Metadata;
 import io.smallrye.reactive.messaging.ce.OutgoingCloudEventMetadata;
 import io.smallrye.reactive.messaging.ce.impl.DefaultOutgoingCloudEventMetadata;
 import net.datafaker.Faker;
+import io.quarkus.logging.Log;
 
 @Path("/fulfilment-requests")
 public class Generate {
@@ -36,6 +37,8 @@ public class Generate {
                 .withSubject(dummyRequest.getFulfilmentCenter()).build();
             fulfilmentRequestEmitter.send(Message.of(dummyRequest,Metadata.of(md)));
         }
+
+        Log.info("Published messages");
        
         return req;
     }

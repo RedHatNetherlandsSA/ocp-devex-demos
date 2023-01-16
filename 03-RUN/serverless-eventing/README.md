@@ -85,7 +85,7 @@ First we will install the AMQ Streams operator that will allow us to create kafk
 
 
 ```shell
-oc apply -f ./03-RUN/serverless-eventing/amq-streams-setup/amq-streams-operator-setup.yaml
+oc apply -f ./03-RUN/serverless-eventing/amq-streams-setup/amq-streams-operator-sub.yaml
 ```
 
 ### Creating a kafka instance
@@ -98,6 +98,14 @@ oc apply -f ./03-RUN/serverless-eventing/amq-streams-setup/kafka-instance.yaml
 ```
 
 Note: In our example we use persistent volume claims for the kafka storage, you can also opt for ephemeral storage for development purposes. If this is the case use the kafka-instance-ephemeral.yaml manifest to create your kafka instance.
+
+### Setting up the Serverless Operator
+
+In case you have not setup the serverless operator yet, you can do that by executing the following command:
+
+```shell
+oc apply -f ./03-RUN/serverless-eventing/serverless-operator-setup/serverless-operator-setup.yaml
+```
 
 ### Creating a KnativeEventing instance
 

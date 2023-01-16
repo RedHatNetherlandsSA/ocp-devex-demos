@@ -23,8 +23,8 @@ OpenShift Serverless .....
 * Installed serverless operator
 
 ```shell
-oc apply -f ./run/01-serverless-serving/serverless-operator-setup/01-serverless-operator-namespace.yaml
-oc apply -f ./run/01-serverless-serving/serverless-operator-setup/01-serverless-operator-sub.yaml
+# oc apply -f ./run/01-serverless-serving/serverless-operator-setup/01-serverless-operator-namespace.yaml
+oc apply -f ./run/01-serverless-serving/serverless-operator-setup/serverless-operator-setup.yaml
 ```
 **NOTE**: These components might take a few minutes to complete the install, please verify the status in "installed operators" using the web console.
 
@@ -226,6 +226,8 @@ oc delete project kn-dotnet
 Let's define a concurrency soft limit for our service. This allows us to tell knative how many concurrent requests our service can handle before triggering the autoscaler. With a concurrency soft limit, it is still possible to burst over this limit in case of sudden spikes.
 
 kn service update --scale-target=10 hello
+
+ --concurrency-limit
 
 We can also specify a concurrency target utilization threshold in order to pre-empt scaling needs, for example, if we reach a threshold of 70% of our scaling target, knative can spin up a new container/pod to anticipate the need to scale. This allows our service to be ready for the coming spike in traffic.
 

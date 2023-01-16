@@ -179,8 +179,8 @@ Our demo application consists of two microservices:
 
 - #### Create Coolstore Catalog service
 ```shell
-oc apply -k ./demo/catalog/gitops/coolstore-catalog/env/overlays && \
-oc apply -k ./demo/catalog/gitops/coolstore-catalog/apps/app-coolstore-catalog/overlays
+oc apply -k ./03-RUN/service-mesh/demo/catalog/gitops/coolstore-catalog/env/overlays && \
+oc apply -k ./03-RUN/service-mesh/demo/catalog/gitops/coolstore-catalog/apps/app-coolstore-catalog/overlays
 ```
 The output should be similar to this:
 ```shell
@@ -197,8 +197,8 @@ persistentvolumeclaim/catalog-database-pvc created
 
 - #### Create Coolstore Inventory service
 ```shell
-oc apply -k ./demo/inventory/gitops/coolstore-inventory/env/overlays && \
-oc apply -k ./demo/inventory/gitops/coolstore-inventory/apps/app-coolstore-inventory/overlays
+oc apply -k ./03-RUN/service-mesh/demo/inventory/gitops/coolstore-inventory/env/overlays && \
+oc apply -k ./03-RUN/service-mesh/demo/inventory/gitops/coolstore-inventory/apps/app-coolstore-inventory/overlays
 ```
 The output should be similar to this:
 ```shell
@@ -250,7 +250,7 @@ EOF
 ```
 or
 ```shell
-oc create -f ./demo/istio/service-mesh-member-roll.yaml
+oc create -f ./03-RUN/service-mesh/demo/istio/service-mesh-member-roll.yaml
 ```
 
 The output should be similar to this:
@@ -258,7 +258,9 @@ The output should be similar to this:
 servicemeshmemberroll.maistra.io/default created
 ```
 
-Now we have successfully created a ServiceMeshMemberRoll which will cause a new service mesh to be deployed into the istio-system project. let’s move on to deploy our application to our service mesh.
+Now we have successfully created a ServiceMeshMemberRoll which will cause a new service mesh to be deployed into the istio-system project. 
+
+Let’s move on to deploy our application to our service mesh.
 
 #### Enabling automatic sidecar injection
 
@@ -541,21 +543,15 @@ Other expressions to try:
 - Total count of all requests to productpage service:
 
 ```shell
-istio_request_duration_milliseconds_count{destination_service=~"catalog-springboot.*"}
-```
-- Total count of all requests to v3 of the reviews service:
-
-```shell
-istio_request_duration_milliseconds_count{destination_service=~"reviews.*", destination_version="v3"}
+istio_request_duration_milliseconds_count{destination_service=~"catalog.*"}
 ```
 
 - Rate of requests over the past 5 minutes to all productpage services:
-
 ```shell
 rate(istio_request_duration_milliseconds_count{destination_service=~"inventory.*", response_code="200"}[5m])
 ```
 
-There are many, many different queries you can perform to extract the data you need. 
+There are many different queries you can perform to extract the data you need. 
 Consult the [Prometheus documentation](https://prometheus.io/docs) for more detail.
 
 
@@ -669,10 +665,10 @@ Let’s now add a 5 second delay for the inventory service.
 
 First, delete the existing inventory-fault VirtualService:
 ```shell
-oc delete virtualservice/inventory-fault -n inventory
+oc delete virtualservice/inventory-fault -n coolstore-inventory
 ```
 
-Then create a new virtualservice
+Then create a new virtualservice inventory-fault-delay
 ```yaml
 oc apply -f - << EOF
 apiVersion: networking.istio.io/v1alpha3
@@ -707,7 +703,7 @@ Hover over the black average data point to confirm that the average response tim
 Before we move to the next step, clean up the fault injection:
 
 ```shell
-oc delete virtualservice/inventory-fault-delay -n inventory
+oc delete virtualservice/inventory-fault-delay -n coolstore-inventory
 ```
 
 ### Enable Circuit Breaker

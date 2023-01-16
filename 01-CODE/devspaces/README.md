@@ -69,6 +69,9 @@ Now we'll log in to our Dev Spaces using OpenShift credentials and create a new 
 ```shell
 https://github.com/RedHatNetherlandsSA/ocp-devex-demos.git
 ```
+After clicking on Create & Open our Work Space will start with loading:
+
+![OpenShift Dev Spaces](../../graphics/devspaces-03.jpg)
 
 ---
 
@@ -86,7 +89,7 @@ attributes:
 projects:
   - git:
       remotes:
-        origin: 'https://github.com/adnan-drina/ocp-devex-demos.git'
+        origin: 'https://github.com/RedHatNetherlandsSA/ocp-devex-demos.git'
     name: ocp-devex-demos
 components:
   - name: dev-tools
@@ -145,7 +148,12 @@ oc new-build dotnet:6.0 --binary --name=mywebapp -l app=mywebapp &&\
 oc start-build mywebapp --from-dir=./bin/Release/net6.0/publish --follow &&\
 oc new-app mywebapp -l app=mywebapp &&\
 oc expose service/mywebapp &&\
-oc set probe deployment/mywebapp  --readiness --get-url=http://:8080 --initial-delay-seconds=5 --period-seconds=5 --failure-threshold=15
+oc set probe deployment/mywebapp  \
+   --readiness \
+   --get-url=http://:8080 \
+   --initial-delay-seconds=5 \
+   --period-seconds=5 \
+   --failure-threshold=15
 ```
 
 Now everyone can access our app from the web using a route
@@ -161,6 +169,9 @@ With our Workspace and Dev project in place, we can now start our inner loop dev
 
 ### CODE:
 Let's make a change in our app Program.cs
+```shell
+app.MapGet("/", () => "Hello World!");
+```
 
 ### BUILD:
 Build our app locally

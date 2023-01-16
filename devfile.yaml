@@ -6,7 +6,7 @@ attributes:
 projects:
   - git:
       remotes:
-        origin: 'https://github.com/adnan-drina/ocp-devex-demos.git'
+        origin: 'https://github.com/RedHatNetherlandsSA/ocp-devex-demos.git'
     name: ocp-devex-demos
 components:
   - name: dev-tools

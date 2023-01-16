@@ -152,7 +152,7 @@ spec:
         - name: deployment
           value: dotnet-demo
         - name: IMAGE
-          value: image-registry.openshift-image-registry.svc:5000/dotnet-pipeline-app/app:latest
+          resource: image
 ```
 
 ### Define a PipelineResource
@@ -174,6 +174,18 @@ spec:
     - name: url
       value: https://github.com/adnan-drina/s2i-dotnetcore-ex
 ```
+- And our image URL
+```yaml
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: s2i-dotnet-image
+spec:
+  type: image
+  params:
+    - name: url
+      value: image-registry.openshift-image-registry.svc:5000/dotnet-pipeline-app/app:latest
+```
 
 ---
 
@@ -182,9 +194,18 @@ The first thing we need to do to run our pipeline is to create previously define
 
 - Let's create all needed artefacts by executing the following command.
 ```shell
-oc apply -f ./02-ocp-pipelines/demo-pipeline.yaml
+oc apply -f ./02-SHIP/pipelines/demo-pipeline.yaml
 ```
 As a result, this command will create defined Tasks, Pipeline and PipelineResources.
+
+The output should be similar to this:
+```shell
+pipelineresource.tekton.dev/s2i-dotnet-project-source created
+pipelineresource.tekton.dev/s2i-dotnet-image created
+clustertask.tekton.dev/s2i-dotnet-3-pr created
+task.tekton.dev/update-deployment created
+pipeline.tekton.dev/s2i-dotnet-pipeline created
+```
 
 We need one more thing and that's the PipelineRun resource.
 A PipelineRun binds a pipeline and a set of parameter values specific to a scenario to run the CI/CD workflow.
@@ -215,8 +236,14 @@ oc adm policy add-role-to-user edit -z pipeline
 
 - Run the pipeline
 ```shell
-oc create -f ./02-ocp-pipelines/demo-pipeline-run.yaml
+oc create -f ./02-SHIP/pipelines/demo-pipeline-run.yaml
 ```
+```shell
+pipelinerun.tekton.dev/run-s2i-dotnet-pipeline-n5bzk created
+```
+If we switch back to our OpenShift Console, we'll see our pipeline running, and we can drill further down to see what exactly is happening in each step during execution.
+
+![OpenShift Pipelines](../../graphics/pipelines-04.jpeg)
 
 ---
 
@@ -235,6 +262,6 @@ OpenShift Pipelines builds upon the Tekton project to enable teams to build Kube
 
 ### Let's clean things up
 ```shell
-oc delete all -l app=dotnet-demo
+oc delete all -l app=dotnet-demo &&\
 oc delete project dotnet-pipeline-app
 ```

@@ -3,7 +3,7 @@ bases:
 
 commonLabels:
   app: catalog-database
-  app.kubernetes.io/version: "v1"
+  version: "v1"
+  app.kubernetes.io/component: postgresql
   app.kubernetes.io/name: catalog-database
   app.kubernetes.io/part-of: coolstore-catalog
-  app.kubernetes.io/component: postgresql

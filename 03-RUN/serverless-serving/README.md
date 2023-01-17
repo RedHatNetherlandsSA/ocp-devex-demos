@@ -223,11 +223,11 @@ oc delete project kn-dotnet
 
 ## Testing the autoscaling
 
-Let's define a concurrency soft limit for our service. This allows us to tell knative how many concurrent requests our service can handle before triggering the autoscaler. With a concurrency soft limit, it is still possible to burst over this limit in case of sudden spikes.
+Let's define a concurrency limit for our service. This allows us to tell knative how many concurrent requests our service can handle before triggering the autoscaler. With a concurrency soft limit, it is still possible to burst over this limit in case of sudden spikes, however in this case we will define a hard limit to show the mechanism
 
-kn service update --scale-target=10 hello
+kn service update --concurrency-limit=10 hello
 
- --concurrency-limit
+ 
 
 We can also specify a concurrency target utilization threshold in order to pre-empt scaling needs, for example, if we reach a threshold of 70% of our scaling target, knative can spin up a new container/pod to anticipate the need to scale. This allows our service to be ready for the coming spike in traffic.
 

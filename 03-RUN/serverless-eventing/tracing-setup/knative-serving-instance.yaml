@@ -1,0 +1,13 @@
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+  namespace: knative-serving
+spec:
+  config:
+    tracing:
+      backend: zipkin
+      debug: 'false'
+      sample-rate: '0.1'
+      zipkin-endpoint: >-
+        http://cluster-collector-collector-headless.tracing-system.svc:9411/api/v2/spans

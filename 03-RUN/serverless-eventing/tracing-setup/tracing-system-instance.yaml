@@ -1,0 +1,35 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tracing-system
+---
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: jaeger-all-in-one-inmemory
+  namespace: tracing-system
+---
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: cluster-collector
+  namespace: tracing-system
+spec:
+  mode: deployment
+  config: |
+    receivers:
+      zipkin:
+    processors:
+    exporters:
+      jaeger:
+        endpoint: jaeger-all-in-one-inmemory-collector-headless.tracing-system.svc:14250
+        tls:
+          ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"
+      logging:
+    service:
+      pipelines:
+        traces:
+          receivers: [zipkin]
+          processors: []
+          exporters: [jaeger, logging]

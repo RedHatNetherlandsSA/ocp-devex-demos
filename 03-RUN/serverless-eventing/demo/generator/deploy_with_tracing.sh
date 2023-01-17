@@ -1,0 +1,3 @@
+#!/bin/bash
+mvn quarkus:add-extension -Dextension=quarkus-opentelemetry
+mvn quarkus:build -Dquarkus.kubernetes.deploy=true -Dquarkus.openshift.env.vars.kafka-bootstrap-servers=my-cluster-kafka-bootstrap.knative-kafka.svc:9092  -Dquarkus.kubernetes-client.trust-certs=true -Dquarkus.openshift.route.expose=true -Dquarkus.openshift.env.vars.quarkus-opentelemetry-tracer-exporter-otlp-endpoint=http://jaeger-all-in-one-inmemory-collector-headless.tracing-system.svc:4317 -Dquarkus.openshift.env.vars.quarkus-opentelemetry-enabled=true

@@ -12,7 +12,6 @@ metadata:
 spec:
   bootstrapServers:
     - 'my-cluster-kafka-bootstrap.knative-kafka.svc:9092'
-    - 'my-cluster-kafka-bootstrap.knative-kafka.svc:9093'
   consumerGroup: fulfilment
   consumers: 1
   initialOffset: latest

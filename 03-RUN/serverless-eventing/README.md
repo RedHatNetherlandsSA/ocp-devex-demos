@@ -218,7 +218,7 @@ Navigate to the ./03-RUN/serverless-eventing/demo/generator folder in a terminal
 Run the following command to deploy our application (make sure you have logged in with oc and you are working in the correct project)
 
 ```shell
-mvn quarkus:build -Dquarkus.kubernetes.deploy=true -Dquarkus.openshift.env.vars.kafka-bootstrap-servers=my-cluster-kafka-bootstrap.knative-kafka.svc:9091,my-cluster-kafka-bootstrap.knative-kafka.svc:9092,my-cluster-kafka-bootstrap.knative-kafka.svc:9093  -Dquarkus.kubernetes-client.trust-certs=true -Dquarkus.openshift.route.expose=true
+mvn quarkus:build -Dquarkus.kubernetes.deploy=true -Dquarkus.openshift.env.vars.kafka-bootstrap-servers=my-cluster-kafka-bootstrap.knative-kafka.svc:9092  -Dquarkus.kubernetes-client.trust-certs=true -Dquarkus.openshift.route.expose=true
 ```
 
 This will build your application and create all the required deploymentconfigs on your Openshift environment.

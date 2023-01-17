@@ -6,17 +6,14 @@ metadata:
 spec:
   broker:
     defaultConfig:
-      authSecretName: ''
       bootstrapServers: >-
-        my-cluster-kafka-bootstrap.knative-kafka.svc:9091,my-cluster-kafka-bootstrap.knative-kafka.svc:9092,my-cluster-kafka-bootstrap.knative-kafka.svc:9093
+        my-cluster-kafka-bootstrap.knative-kafka.svc:9092
       numPartitions: 6
       replicationFactor: 3
     enabled: true
   channel:
-    authSecretName: ''
-    authSecretNamespace: ''
     bootstrapServers: >-
-      my-cluster-kafka-bootstrap.knative-kafka.svc:9091,my-cluster-kafka-bootstrap.knative-kafka.svc:9092,my-cluster-kafka-bootstrap.knative-kafka.svc:9093
+      my-cluster-kafka-bootstrap.knative-kafka.svc:9092
     enabled: true
   high-availability:
     replicas: 1

@@ -23,7 +23,6 @@ OpenShift Serverless .....
 * Installed serverless operator
 
 ```shell
-# oc apply -f ./run/01-serverless-serving/serverless-operator-setup/01-serverless-operator-namespace.yaml
 oc apply -f ./run/01-serverless-serving/serverless-operator-setup/serverless-operator-setup.yaml
 ```
 **NOTE**: These components might take a few minutes to complete the install, please verify the status in "installed operators" using the web console.

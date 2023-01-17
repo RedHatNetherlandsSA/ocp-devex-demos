@@ -12,9 +12,12 @@ For more information, please see the [official product documentation](https://do
 ---
 
 ## Introduction to serverless
-OpenShift Serverless .....
 
 ![serverless01](../../graphics/serverless-01.png)
+
+![serverless-features](../../graphics/serverless-features.png)
+
+![serverless-operational-benefits](../../graphics/serverless-operational-benefits.png)
 
 ---
 

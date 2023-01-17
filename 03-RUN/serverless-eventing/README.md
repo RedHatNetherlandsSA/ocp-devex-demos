@@ -14,6 +14,8 @@ OpenShift provides developers the capability to build serverless applications us
 
 ![serverless01](../../graphics/serverless-01.png)
 
+![serverless-features](../../graphics/serverless-features.png)
+
 ![serverless-operational-benefits](../../graphics/serverless-operational-benefits.png)
 
 But first, let's explain some of the key concepts, before diving into a more concrete example.
